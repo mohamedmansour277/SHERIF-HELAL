@@ -458,8 +458,37 @@ function validateNameInput(input) {
 }
 
 function validatePhoneInput(input) {
+  // 1. السماح بالأرقام فقط وإزالة أي رموز أو مسافات
   input.value = input.value.replace(/[^0-9]/g, "");
-  clearError("phone");
+
+  const val = input.value;
+  const errorElem = document.getElementById("error-phone");
+
+  // إذا كان الحقل فارغاً يتم مسح رسالة الخطأ والـ class
+  if (!val) {
+    clearError("phone");
+    return;
+  }
+
+  // Regex يتحقق أن الرقم يبدأ بـ 010 أو 011 أو 012 أو 015 ويتكون تماماً من 11 رقم
+  const egyptianPhoneRegex = /^01[0125][0-9]{8}$/;
+
+  // التحقق من بداية الرقم أثناء الكتابة (إذا كان إدخال الرقم لم يكتمل بعد)
+  const validPrefixRegex = /^01[0125]/;
+
+  if (val.length >= 3 && !validPrefixRegex.test(val)) {
+    if (errorElem) errorElem.innerText = "يجب أن يبدأ الرقم بـ 010 أو 011 أو 012 أو 015";
+    input.classList.add("input-invalid");
+  } else if (val.length === 11 && !egyptianPhoneRegex.test(val)) {
+    if (errorElem) errorElem.innerText = "رقم الهاتف غير صحيح";
+    input.classList.add("input-invalid");
+  } else if (val.length > 11) {
+    if (errorElem) errorElem.innerText = "رقم الهاتف يجب أن يكون 11 رقم فقط";
+    input.classList.add("input-invalid");
+  } else {
+    // الرقم صحيح حتى الآن
+    clearError("phone");
+  }
 }
 
 function selectGrade(gradeValue, btnElem) {
@@ -583,9 +612,17 @@ async function handleAuthSubmit() {
     }
   }
 
-  if (!phoneVal || phoneVal.length < 11) {
+  // التحقق النهائي من صحة رقم الهاتف عند الضغط على زر الإرسال
+  const egyptianPhoneRegex = /^01[0125][0-9]{8}$/;
+
+  if (!phoneVal) {
     const errPhone = document.getElementById("error-phone");
-    if (errPhone) errPhone.innerText = "رقمك يا غالي (11 رقم)";
+    if (errPhone) errPhone.innerText = "يرجى إدخال رقم الهاتف";
+    if (phoneInput) phoneInput.classList.add("input-invalid");
+    hasError = true;
+  } else if (!egyptianPhoneRegex.test(phoneVal)) {
+    const errPhone = document.getElementById("error-phone");
+    if (errPhone) errPhone.innerText = "أدخل رقم هاتف صحيح (11 رقم ويبدأ بـ 010, 011, 012, 015)";
     if (phoneInput) phoneInput.classList.add("input-invalid");
     hasError = true;
   }
