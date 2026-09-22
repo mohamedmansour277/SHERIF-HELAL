@@ -876,6 +876,10 @@ main {
 }
 
 /* Password Field Wrapper & Eye Toggle */
+.field-error {
+  color: #ff7070;
+  font-size: 0.8rem;
+}
 .password-wrapper {
   position: relative;
   display: flex;
